@@ -1,10 +1,19 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Search, User, Menu } from "lucide-react";
+import { ShoppingBag, User, Menu, LogOut } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -24,9 +33,6 @@ const Header = () => {
           <Link to="/marketplace" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
             Marketplace
           </Link>
-          <Link to="/categories" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-            Catégories
-          </Link>
           <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
             Blog
           </Link>
@@ -37,16 +43,38 @@ const Header = () => {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center space-x-4">
-          <Button variant="ghost" size="icon">
-            <Search className="h-5 w-5" />
-          </Button>
-          <Button variant="outline">
-            <User className="h-4 w-4 mr-2" />
-            Connexion
-          </Button>
-          <Button variant="hero">
-            Devenir Membre
-          </Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <User className="h-4 w-4 mr-2" />
+                  Mon Compte
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile">Mon Profil</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Déconnexion
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button variant="outline" asChild>
+                <Link to="/auth">
+                  <User className="h-4 w-4 mr-2" />
+                  Connexion
+                </Link>
+              </Button>
+              <Button variant="hero" asChild>
+                <Link to="/auth">Devenir Membre</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -64,29 +92,45 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden border-t border-border bg-background animate-slide-in">
           <nav className="flex flex-col space-y-4 p-4">
-            <Link to="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+            <Link to="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
               Accueil
             </Link>
-            <Link to="/marketplace" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+            <Link to="/marketplace" className="text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
               Marketplace
             </Link>
-            <Link to="/categories" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-              Catégories
-            </Link>
-            <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+            <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
               Blog
             </Link>
-            <Link to="/about" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+            <Link to="/about" className="text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
               À Propos
             </Link>
             <div className="flex flex-col space-y-2 pt-4">
-              <Button variant="outline" className="w-full">
-                <User className="h-4 w-4 mr-2" />
-                Connexion
-              </Button>
-              <Button variant="hero" className="w-full">
-                Devenir Membre
-              </Button>
+              {user ? (
+                <>
+                  <Button variant="outline" className="w-full" asChild onClick={() => setIsMenuOpen(false)}>
+                    <Link to="/profile">
+                      <User className="h-4 w-4 mr-2" />
+                      Mon Profil
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={() => { signOut(); setIsMenuOpen(false); }}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Déconnexion
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" className="w-full" asChild onClick={() => setIsMenuOpen(false)}>
+                    <Link to="/auth">
+                      <User className="h-4 w-4 mr-2" />
+                      Connexion
+                    </Link>
+                  </Button>
+                  <Button variant="hero" className="w-full" asChild onClick={() => setIsMenuOpen(false)}>
+                    <Link to="/auth">Devenir Membre</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </nav>
         </div>
