@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, User, Menu, LogOut } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ShoppingBag, User, Menu, LogOut, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/contexts/CartContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +16,7 @@ import {
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { itemCount } = useCart();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -39,10 +42,27 @@ const Header = () => {
           <Link to="/about" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
             À Propos
           </Link>
+          <Link to="/contact" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+            Contact
+          </Link>
         </nav>
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center space-x-4">
+          <Link to="/cart" className="relative">
+            <Button variant="ghost" size="icon">
+              <ShoppingCart className="h-5 w-5" />
+              {itemCount > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                >
+                  {itemCount}
+                </Badge>
+              )}
+            </Button>
+          </Link>
+          
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -103,6 +123,18 @@ const Header = () => {
             </Link>
             <Link to="/about" className="text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
               À Propos
+            </Link>
+            <Link to="/contact" className="text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
+              Contact
+            </Link>
+            <Link to="/cart" className="relative inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
+              <ShoppingCart className="h-5 w-5 mr-2" />
+              Panier
+              {itemCount > 0 && (
+                <Badge variant="destructive" className="ml-2">
+                  {itemCount}
+                </Badge>
+              )}
             </Link>
             <div className="flex flex-col space-y-2 pt-4">
               {user ? (
