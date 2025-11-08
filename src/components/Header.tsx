@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingBag, User, Menu, LogOut, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { ShoppingBag, User, Menu, LogOut, ShoppingCart, LayoutDashboard } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/contexts/CartContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,8 +16,37 @@ import {
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [memberType, setMemberType] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const { itemCount } = useCart();
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    } else {
+      setMemberType(null);
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('profiles')
+      .select('member_type')
+      .eq('id', user.id)
+      .single();
+
+    setMemberType(data?.member_type || null);
+  };
+
+  const getDashboardLink = () => {
+    if (memberType === 'grossiste') return '/dashboard/wholesale';
+    if (memberType === 'detaillant') return '/dashboard/retail';
+    return null;
+  };
+
+  const dashboardLink = getDashboardLink();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -72,6 +102,17 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {dashboardLink && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to={dashboardLink}>
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Mon Espace
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem asChild>
                   <Link to="/profile">Mon Profil</Link>
                 </DropdownMenuItem>
@@ -139,6 +180,14 @@ const Header = () => {
             <div className="flex flex-col space-y-2 pt-4">
               {user ? (
                 <>
+                  {dashboardLink && (
+                    <Button variant="outline" className="w-full" asChild onClick={() => setIsMenuOpen(false)}>
+                      <Link to={dashboardLink}>
+                        <LayoutDashboard className="h-4 w-4 mr-2" />
+                        Mon Espace
+                      </Link>
+                    </Button>
+                  )}
                   <Button variant="outline" className="w-full" asChild onClick={() => setIsMenuOpen(false)}>
                     <Link to="/profile">
                       <User className="h-4 w-4 mr-2" />
