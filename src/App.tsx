@@ -18,6 +18,7 @@ import Cart from "./pages/Cart";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import WholesaleDashboard from "./pages/WholesaleDashboard";
 import RetailDashboard from "./pages/RetailDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/dashboard/wholesale" element={<WholesaleDashboard />} />
               <Route path="/dashboard/retail" element={<RetailDashboard />} />
+              <Route path="/dashboard/admin" element={<AdminDashboard />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -61,6 +61,7 @@ export default function Cart() {
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => {
+                if (!item.product) return null;
                 const imageUrl = item.product.images?.[0] || '/placeholder.svg';
                 const price = item.product.price + (item.variant?.price_modifier || 0);
 
