@@ -5,6 +5,7 @@ import FeaturedCategories from "@/components/FeaturedCategories";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import textileImage from "@/assets/product-textile.jpg";
 import potteryImage from "@/assets/product-pottery.jpg";
@@ -71,9 +72,11 @@ const Index = () => {
                   Découvrez notre sélection de produits les plus populaires
                 </p>
               </div>
-              <Button variant="outline">
-                Voir tout
-                <ArrowRight className="ml-2 h-4 w-4" />
+              <Button variant="outline" asChild>
+                <Link to="/marketplace">
+                  Voir tout
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
 
@@ -97,15 +100,20 @@ const Index = () => {
                 et profitez d'un suivi personnalisé de vos commandes
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                <Button variant="secondary" size="lg">
-                  Espace Grossiste
+                <Button variant="secondary" size="lg" asChild>
+                  <Link to="/dashboard/wholesale">
+                    Espace Grossiste
+                  </Link>
                 </Button>
                 <Button 
                   variant="outline" 
                   size="lg"
                   className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                  asChild
                 >
-                  Espace Détaillant
+                  <Link to="/dashboard/retail">
+                    Espace Détaillant
+                  </Link>
                 </Button>
               </div>
             </div>

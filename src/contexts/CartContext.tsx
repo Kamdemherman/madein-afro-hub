@@ -52,13 +52,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
         product_id,
         variant_id,
         quantity,
-        products:product_id (
+        product:product_id (
           name,
           price,
           images,
           slug
         ),
-        product_variants:variant_id (
+        variant:variant_id (
           color,
           size,
           price_modifier
