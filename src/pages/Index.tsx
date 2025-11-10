@@ -6,6 +6,7 @@ import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import textileImage from "@/assets/product-textile.jpg";
 import potteryImage from "@/assets/product-pottery.jpg";

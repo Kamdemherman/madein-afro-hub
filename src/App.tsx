@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
+import { WishlistProvider } from "./contexts/WishlistContext";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Auth from "./pages/Auth";
@@ -16,6 +17,7 @@ import BlogPost from "./pages/BlogPost";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
+import Wishlist from "./pages/Wishlist";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import WholesaleDashboard from "./pages/WholesaleDashboard";
 import RetailDashboard from "./pages/RetailDashboard";
@@ -42,6 +44,7 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/dashboard/wholesale" element={<WholesaleDashboard />} />
               <Route path="/dashboard/retail" element={<RetailDashboard />} />
