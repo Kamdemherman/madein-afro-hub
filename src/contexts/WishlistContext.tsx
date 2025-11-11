@@ -17,9 +17,9 @@ interface WishlistItem {
 interface WishlistContextType {
   items: WishlistItem[];
   isInWishlist: (productId: string) => boolean;
-  addToWishlist: (productId: string) => Promise<void>;
-  removeFromWishlist: (productId: string) => Promise<void>;
-  toggleWishlist: (productId: string) => Promise<void>;
+  addItem: (productId: string) => Promise<void>;
+  removeItem: (productId: string) => Promise<void>;
+  refreshWishlist: () => Promise<void>;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -65,7 +65,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     return items.some(item => item.product_id === productId);
   };
 
-  const addToWishlist = async (productId: string) => {
+  const addItem = async (productId: string) => {
     if (!user) {
       toast({
         title: 'Connexion requise',
@@ -98,11 +98,13 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeFromWishlist = async (productId: string) => {
+  const removeItem = async (productId: string) => {
+    if (!user) return;
+
     const { error } = await supabase
       .from('wishlist_items')
       .delete()
-      .eq('user_id', user?.id)
+      .eq('user_id', user.id)
       .eq('product_id', productId);
 
     if (error) {
@@ -121,21 +123,13 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const toggleWishlist = async (productId: string) => {
-    if (isInWishlist(productId)) {
-      await removeFromWishlist(productId);
-    } else {
-      await addToWishlist(productId);
-    }
-  };
-
   return (
     <WishlistContext.Provider value={{
       items,
       isInWishlist,
-      addToWishlist,
-      removeFromWishlist,
-      toggleWishlist,
+      addItem,
+      removeItem,
+      refreshWishlist,
     }}>
       {children}
     </WishlistContext.Provider>

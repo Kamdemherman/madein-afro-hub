@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
-import { WishlistProvider } from "./contexts/WishlistContext";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Auth from "./pages/Auth";
@@ -33,8 +32,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <WishlistProvider>
-            <CartProvider>
+          <CartProvider>
+            <WishlistProvider>
               <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/marketplace" element={<Marketplace />} />
@@ -54,8 +53,8 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
               </Routes>
-            </CartProvider>
-          </WishlistProvider>
+            </WishlistProvider>
+          </CartProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
