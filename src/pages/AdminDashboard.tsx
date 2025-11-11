@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Package, ShoppingCart, TrendingUp, Shield, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Users, Package, ShoppingCart, TrendingUp, Shield, CheckCircle, XCircle, Clock, Edit, Trash2, Plus } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -18,6 +18,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Stats {
   totalUsers: number;
@@ -37,9 +49,13 @@ interface User {
 interface Product {
   id: string;
   name: string;
+  slug: string;
+  description: string | null;
   price: number;
   stock_quantity: number;
   is_active: boolean;
+  images: string[] | null;
+  category_id: string | null;
   created_at: string;
 }
 
@@ -67,10 +83,30 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<any[]>([]);
+  
+  // Product form
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productForm, setProductForm] = useState({
+    name: '',
+    slug: '',
+    description: '',
+    price: 0,
+    stock_quantity: 0,
+    category_id: '',
+    images: [''],
+  });
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     checkAdminAccess();
   }, [user]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadCategories();
+    }
+  }, [isAdmin]);
 
   const checkAdminAccess = async () => {
     if (!user) {
@@ -108,6 +144,11 @@ export default function AdminDashboard() {
       loadOrders(),
     ]);
     setLoading(false);
+  };
+
+  const loadCategories = async () => {
+    const { data } = await supabase.from('categories').select('*').order('name');
+    if (data) setCategories(data);
   };
 
   const loadStats = async () => {
@@ -155,9 +196,9 @@ export default function AdminDashboard() {
   const loadProducts = async () => {
     const { data, error } = await supabase
       .from('products')
-      .select('id, name, price, stock_quantity, is_active, created_at')
+      .select('*')
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(20);
 
     if (error) {
       console.error('Error loading products:', error);
@@ -211,6 +252,87 @@ export default function AdminDashboard() {
       title: 'Succès',
       description: 'Statut du produit mis à jour',
     });
+    loadProducts();
+  };
+
+  const openProductDialog = (product?: Product) => {
+    if (product) {
+      setEditingProduct(product);
+      setProductForm({
+        name: product.name,
+        slug: product.slug,
+        description: product.description || '',
+        price: product.price,
+        stock_quantity: product.stock_quantity,
+        category_id: product.category_id || '',
+        images: product.images || [''],
+      });
+    } else {
+      setEditingProduct(null);
+      setProductForm({
+        name: '',
+        slug: '',
+        description: '',
+        price: 0,
+        stock_quantity: 0,
+        category_id: '',
+        images: [''],
+      });
+    }
+    setDialogOpen(true);
+  };
+
+  const saveProduct = async () => {
+    if (!user) return;
+    
+    const productData = {
+      ...productForm,
+      seller_id: user.id,
+      is_active: true,
+      images: productForm.images.filter(i => i.trim() !== ''),
+    };
+
+    if (editingProduct) {
+      const { error } = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', editingProduct.id);
+      
+      if (error) {
+        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+        return;
+      }
+      toast({ title: 'Succès', description: 'Produit mis à jour' });
+    } else {
+      const { error } = await supabase
+        .from('products')
+        .insert(productData);
+      
+      if (error) {
+        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+        return;
+      }
+      toast({ title: 'Succès', description: 'Produit créé' });
+    }
+    
+    setDialogOpen(false);
+    loadProducts();
+  };
+
+  const deleteProduct = async (productId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return;
+    
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId);
+    
+    if (error) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+      return;
+    }
+    
+    toast({ title: 'Succès', description: 'Produit supprimé' });
     loadProducts();
   };
 
@@ -369,9 +491,119 @@ export default function AdminDashboard() {
 
           <TabsContent value="products" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Gestion des produits</CardTitle>
-                <CardDescription>Liste des produits du catalogue</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Gestion des produits</CardTitle>
+                  <CardDescription>Liste des produits du catalogue</CardDescription>
+                </div>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => openProductDialog()}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Ajouter
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>{editingProduct ? 'Modifier' : 'Créer'} un produit</DialogTitle>
+                      <DialogDescription>
+                        Remplissez les informations du produit
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="name">Nom</Label>
+                        <Input
+                          id="name"
+                          value={productForm.name}
+                          onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="slug">Slug (URL)</Label>
+                        <Input
+                          id="slug"
+                          value={productForm.slug}
+                          onChange={(e) => setProductForm({ ...productForm, slug: e.target.value })}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                          id="description"
+                          value={productForm.description}
+                          onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="price">Prix (€)</Label>
+                          <Input
+                            id="price"
+                            type="number"
+                            step="0.01"
+                            value={productForm.price}
+                            onChange={(e) => setProductForm({ ...productForm, price: parseFloat(e.target.value) })}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="stock">Stock</Label>
+                          <Input
+                            id="stock"
+                            type="number"
+                            value={productForm.stock_quantity}
+                            onChange={(e) => setProductForm({ ...productForm, stock_quantity: parseInt(e.target.value) })}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="category">Catégorie</Label>
+                        <Select
+                          value={productForm.category_id}
+                          onValueChange={(value) => setProductForm({ ...productForm, category_id: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner une catégorie" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Images (URLs)</Label>
+                        {productForm.images.map((img, idx) => (
+                          <Input
+                            key={idx}
+                            value={img}
+                            placeholder="https://example.com/image.jpg"
+                            onChange={(e) => {
+                              const newImages = [...productForm.images];
+                              newImages[idx] = e.target.value;
+                              setProductForm({ ...productForm, images: newImages });
+                            }}
+                          />
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setProductForm({ ...productForm, images: [...productForm.images, ''] })}
+                        >
+                          + Ajouter une image
+                        </Button>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
+                      <Button onClick={saveProduct}>Enregistrer</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -398,13 +630,29 @@ export default function AdminDashboard() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => toggleProductStatus(product.id, product.is_active)}
-                          >
-                            {product.is_active ? 'Désactiver' : 'Activer'}
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openProductDialog(product)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleProductStatus(product.id, product.is_active)}
+                            >
+                              {product.is_active ? 'Désactiver' : 'Activer'}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => deleteProduct(product.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

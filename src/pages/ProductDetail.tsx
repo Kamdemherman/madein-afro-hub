@@ -105,15 +105,23 @@ export default function ProductDetail() {
                 <img 
                   src={mainImage} 
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                 />
               </div>
               {product.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-4">
                   {product.images.map((img, idx) => (
-                    <div key={idx} className="aspect-square rounded-md overflow-hidden bg-muted">
+                    <button 
+                      key={idx} 
+                      className="aspect-square rounded-md overflow-hidden bg-muted border-2 border-transparent hover:border-primary transition-all"
+                      onClick={() => {
+                        const newImages = [...product.images];
+                        [newImages[0], newImages[idx]] = [newImages[idx], newImages[0]];
+                        setProduct({...product, images: newImages});
+                      }}
+                    >
                       <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}

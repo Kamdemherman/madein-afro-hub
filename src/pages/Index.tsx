@@ -19,7 +19,6 @@ type HomeProduct = {
   categories: { name: string } | null;
 };
 
-
 const Index = () => {
   const [featured, setFeatured] = useState<HomeProduct[]>([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
