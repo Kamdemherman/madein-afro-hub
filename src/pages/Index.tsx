@@ -6,51 +6,38 @@ import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-import textileImage from "@/assets/product-textile.jpg";
-import potteryImage from "@/assets/product-pottery.jpg";
-import basketsImage from "@/assets/product-baskets.jpg";
+type HomeProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  images: string[] | null;
+  stock_quantity: number;
+  categories: { name: string } | null;
+};
 
-const featuredProducts = [
-  {
-    id: "1",
-    name: "Tissus Africains Traditionnels - Collection Wax",
-    price: 45.99,
-    image: textileImage,
-    category: "Textiles",
-    isNew: true,
-    inStock: true,
-  },
-  {
-    id: "2",
-    name: "Poterie Artisanale Terre Cuite - Ensemble de 5",
-    price: 89.99,
-    image: potteryImage,
-    category: "Artisanat",
-    isNew: false,
-    inStock: true,
-  },
-  {
-    id: "3",
-    name: "Paniers Tressés à la Main - Set Décoratif",
-    price: 65.50,
-    image: basketsImage,
-    category: "Décoration",
-    isNew: true,
-    inStock: true,
-  },
-  {
-    id: "4",
-    name: "Collection Textile Premium - Motifs Géométriques",
-    price: 52.00,
-    image: textileImage,
-    category: "Textiles",
-    isNew: false,
-    inStock: true,
-  },
-];
 
 const Index = () => {
+  const [featured, setFeatured] = useState<HomeProduct[]>([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id,name,slug,price,images,stock_quantity,categories(name)')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(8);
+      if (!error && data) setFeatured(data as HomeProduct[]);
+      setLoadingFeatured(false);
+    };
+    load();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -80,11 +67,23 @@ const Index = () => {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} {...product} />
-              ))}
-            </div>
+            {loadingFeatured ? (
+              <div className="text-center text-muted-foreground">Chargement...</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {featured.map((product) => (
+                  <ProductCard 
+                    key={product.id}
+                    id={product.id}
+                    name={product.name}
+                    price={Number(product.price)}
+                    image={(product.images?.[0]) || '/placeholder.svg'}
+                    category={product.categories?.name || 'Divers'}
+                    inStock={product.stock_quantity > 0}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
