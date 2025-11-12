@@ -54,13 +54,17 @@ serve(async (req) => {
     // Create line items
     const lineItems = items.map((item: any) => {
       const price = item.product.price + (item.variant?.price_modifier || 0);
+      // Only send absolute HTTP(S) image URLs to Stripe, otherwise omit images
+      const firstImage = Array.isArray(item.product.images) ? item.product.images[0] : undefined;
+      const imageUrl = typeof firstImage === 'string' && /^https?:\/\//i.test(firstImage) ? firstImage : undefined;
+
       return {
         price_data: {
           currency: 'eur',
           product_data: {
             name: item.product.name,
             description: item.variant ? `${item.variant.color || ''} ${item.variant.size || ''}`.trim() : undefined,
-            images: item.product.images?.length > 0 ? [item.product.images[0]] : undefined,
+            images: imageUrl ? [imageUrl] : undefined,
           },
           unit_amount: Math.round(price * 100), // Convert to cents
         },
