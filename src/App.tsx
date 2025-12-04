@@ -9,6 +9,7 @@ import { WishlistProvider } from "./contexts/WishlistContext";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Auth from "./pages/Auth";
+import AdminLogin from "./pages/AdminLogin";
 import Profile from "./pages/Profile";
 import ProductDetail from "./pages/ProductDetail";
 import Blog from "./pages/Blog";
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/dashboard/wholesale" element={<WholesaleDashboard />} />
               <Route path="/dashboard/retail" element={<RetailDashboard />} />
               <Route path="/dashboard/admin" element={<AdminDashboard />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

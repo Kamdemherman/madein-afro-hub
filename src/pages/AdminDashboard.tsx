@@ -111,7 +111,7 @@ export default function AdminDashboard() {
 
   const checkAdminAccess = async () => {
     if (!user) {
-      navigate('/auth');
+      navigate('/admin/login');
       return;
     }
 
