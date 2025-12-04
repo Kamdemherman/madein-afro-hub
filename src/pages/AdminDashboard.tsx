@@ -30,6 +30,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import ImageUpload from '@/components/ImageUpload';
 
 interface Stats {
   totalUsers: number;
@@ -575,27 +576,13 @@ export default function AdminDashboard() {
                         </Select>
                       </div>
                       <div className="grid gap-2">
-                        <Label>Images (URLs)</Label>
-                        {productForm.images.map((img, idx) => (
-                          <Input
-                            key={idx}
-                            value={img}
-                            placeholder="https://example.com/image.jpg"
-                            onChange={(e) => {
-                              const newImages = [...productForm.images];
-                              newImages[idx] = e.target.value;
-                              setProductForm({ ...productForm, images: newImages });
-                            }}
-                          />
-                        ))}
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setProductForm({ ...productForm, images: [...productForm.images, ''] })}
-                        >
-                          + Ajouter une image
-                        </Button>
+                        <Label>Images du produit</Label>
+                        <ImageUpload
+                          images={productForm.images.filter(img => img.trim() !== '')}
+                          onImagesChange={(newImages) => setProductForm({ ...productForm, images: newImages })}
+                          userId={user?.id || ''}
+                          maxImages={5}
+                        />
                       </div>
                     </div>
                     <DialogFooter>
@@ -609,6 +596,7 @@ export default function AdminDashboard() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Image</TableHead>
                       <TableHead>Nom</TableHead>
                       <TableHead>Prix</TableHead>
                       <TableHead>Stock</TableHead>
@@ -619,6 +607,17 @@ export default function AdminDashboard() {
                   <TableBody>
                     {products.map((product) => (
                       <TableRow key={product.id}>
+                        <TableCell>
+                          <div className="w-12 h-12 rounded-md overflow-hidden bg-muted">
+                            {product.images && product.images[0] ? (
+                              <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                                No img
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell>{product.price.toFixed(2)} €</TableCell>
                         <TableCell>{product.stock_quantity}</TableCell>
