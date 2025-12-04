@@ -75,6 +75,7 @@ const Index = () => {
                     key={product.id}
                     id={product.id}
                     name={product.name}
+                    slug={product.slug}
                     price={Number(product.price)}
                     image={(product.images?.[0]) || '/placeholder.svg'}
                     category={product.categories?.name || 'Divers'}
