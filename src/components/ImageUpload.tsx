@@ -12,7 +12,7 @@ interface ImageUploadProps {
   maxImages?: number;
 }
 
-export default function ImageUpload({ images, onImagesChange, userId, maxImages = 5 }: ImageUploadProps) {
+const ImageUpload = ({ images, onImagesChange, userId, maxImages = 5 }: ImageUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -156,4 +156,6 @@ export default function ImageUpload({ images, onImagesChange, userId, maxImages 
       </p>
     </div>
   );
-}
+};
+
+export default ImageUpload;
