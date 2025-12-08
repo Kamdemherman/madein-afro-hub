@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Shield, Lock } from 'lucide-react';
 
-export default function AdminLogin() {
+const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -154,4 +154,6 @@ export default function AdminLogin() {
       </Card>
     </div>
   );
-}
+};
+
+export default AdminLogin;
